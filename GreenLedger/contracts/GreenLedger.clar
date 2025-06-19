@@ -255,4 +255,66 @@
   )
 )
 
+;; Fixed AI-powered automated compliance and market analysis function
+(define-public (ai-automated-compliance-analysis (credit-id uint)
+                                                (market-data (list 10 uint))
+                                                (environmental-metrics (list 8 uint))
+                                                (regulatory-scores (list 5 uint)))
+  (let ((credit (unwrap! (map-get? carbon-credits { credit-id: credit-id }) err-not-found))
+        (project (unwrap! (map-get? project-registry { project-id: (get project-id credit) }) err-not-found))
+        
+        ;; Calculate market volatility score (fixed)
+        (market-volatility (calculate-market-volatility market-data))
+        (avg-market-score (/ (fold + market-data u0) (list-length-10 market-data)))
+        
+        ;; Calculate environmental impact score
+        (env-impact-score (calculate-ai-weighted-score 
+                          environmental-metrics 
+                          (list u15 u20 u15 u10 u15 u10 u10 u5)))
+        
+        ;; Calculate regulatory compliance score (fixed)
+        (regulatory-compliance (/ (fold + regulatory-scores u0) (list-length-5 regulatory-scores)))
+        
+        ;; AI-driven risk assessment (fixed)
+        (risk-factors (list market-volatility env-impact-score regulatory-compliance))
+        (overall-risk (/ (fold + risk-factors u0) (list-length-3 risk-factors)))
+        
+        ;; Dynamic pricing adjustment based on AI analysis
+        (current-price (get price-per-credit credit))
+        (market-adjustment (if (> avg-market-score u70) u110 u90)) ;; +10% or -10%
+        (risk-adjustment (if (< overall-risk u30) u105 u95)) ;; +5% or -5%
+        (suggested-price (/ (* (* current-price market-adjustment) risk-adjustment) u10000))
+        
+        ;; Compliance status determination
+        (compliance-threshold u80)
+        (is-compliant (and (> env-impact-score compliance-threshold)
+                         (> regulatory-compliance compliance-threshold)
+                         (< overall-risk u40)))
+        
+        ;; Generate AI recommendations
+        (recommendation-score (+ (* env-impact-score u3) 
+                             (* regulatory-compliance u2) 
+                             (- u100 overall-risk))))
+    
+    ;; Update credit with AI analysis results
+    (map-set carbon-credits
+      { credit-id: credit-id }
+      (merge credit {
+        price-per-credit: suggested-price,
+        ai-confidence-score: (min-uint u100 recommendation-score)
+      })
+    )
+    
+    ;; Return comprehensive analysis results
+    (ok {
+      market-score: avg-market-score,
+      environmental-score: env-impact-score,
+      regulatory-score: regulatory-compliance,
+      overall-risk: overall-risk,
+      suggested-price: suggested-price,
+      is-compliant: is-compliant,
+      recommendation: recommendation-score
+    })
+  )
+)
 
